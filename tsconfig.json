@@ -18,7 +18,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "planets": ["src/components/index"],
+      "planets-api": ["src/api/index"],
+      "planets-hook": ["src/hooks/index"],
+      "planets-util": ["src/utils/index"]
+    }
   },
   "include": [
     "src"

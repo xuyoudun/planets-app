@@ -3,6 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 const paths = require('./paths');
+// 添加环境配置信息
+const profilesCfg = require('../profiles.config');
+const minimist = require('minimist');
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve('./paths')];
@@ -13,6 +16,14 @@ if (!NODE_ENV) {
     'The NODE_ENV environment variable is required but was not specified.'
   );
 }
+
+// 获取命令行参数 --profiles， 默认dev
+const profiles = (function () {
+  const argv = minimist(process.argv.slice(2));
+  const active = argv.profiles || argv['_'][0] || 'dev';
+  console.log('\x1b[32m%s\x1b[4m%s\x1b[0m', 'The following profiles are active: ', active)
+  return JSON.stringify(profilesCfg[active]);
+})();
 
 // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
 const dotenvFiles = [
@@ -95,7 +106,7 @@ function getClientEnvironment(publicUrl) {
     'process.env': Object.keys(raw).reduce((env, key) => {
       env[key] = JSON.stringify(raw[key]);
       return env;
-    }, {}),
+    }, {PROFILES: profiles}),
   };
 
   return { raw, stringified };

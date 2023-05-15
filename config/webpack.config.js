@@ -71,6 +71,8 @@ const cssRegex = /\.css$/;
 const cssModuleRegex = /\.module\.css$/;
 const sassRegex = /\.(scss|sass)$/;
 const sassModuleRegex = /\.module\.(scss|sass)$/;
+const lessRegex = /\.less$/;
+const lessModuleRegex = /\.module\.less$/;
 
 const hasJsxRuntime = (() => {
   if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
@@ -179,6 +181,17 @@ module.exports = function (webpackEnv) {
           loader: require.resolve(preProcessor),
           options: {
             sourceMap: true,
+            // 如果使用less-loader@5，请移除 lessOptions 这一级直接配置选项。
+            ...(preProcessor == 'less-loader' && {
+              lessOptions: {
+                javascriptEnabled: true,
+                modifyVars: {
+                  'primary-color': '#b05b24', // antd主题样式
+                  'disabled-bg': '#F5F5F5',
+                  'disabled-color': '#101210'
+                },
+              }
+            })
           },
         }
       );
@@ -318,6 +331,11 @@ module.exports = function (webpackEnv) {
           'react-dom$': 'react-dom/profiling',
           'scheduler/tracing': 'scheduler/tracing-profiling',
         }),
+        // 文件路径别名
+        'planets': path.resolve(__dirname, '../src/components'),
+        'planets-api': path.resolve(__dirname, '../src/api'),
+        'planets-util': path.resolve(__dirname, '../src/utils'),
+        'planets-hook': path.resolve(__dirname, '../src/hooks'),
         ...(modules.webpackAliases || {}),
       },
       plugins: [
@@ -541,6 +559,36 @@ module.exports = function (webpackEnv) {
                   },
                 },
                 'sass-loader'
+              ),
+            },
+            // 添加less loader
+            {
+              test: lessRegex,
+              exclude: sassModuleRegex,
+              use: getStyleLoaders(
+                  {
+                    importLoaders: 3,
+                    sourceMap: isEnvProduction
+                        ? shouldUseSourceMap
+                        : isEnvDevelopment,
+                  },
+                  'less-loader'
+              ),
+              sideEffects: true,
+            },
+            {
+              test: lessModuleRegex ,
+              use: getStyleLoaders(
+                  {
+                    importLoaders: 3,
+                    sourceMap: isEnvProduction
+                        ? shouldUseSourceMap
+                        : isEnvDevelopment,
+                    modules: {
+                      getLocalIdent: getCSSModuleLocalIdent,
+                    },
+                  },
+                  'less-loader'
               ),
             },
             // "file" loader makes sure those assets get served by WebpackDevServer.
