@@ -13,8 +13,8 @@ const FakeProgress = function (opts) {
 
 	this.timeConstant = opts.timeConstant || 1000;
 	this.progress = 0;
-	this._running = false;
-	this._intervalFrequency = 100;
+	this.running = false;
+	this.intervalFrequency = 100;
 	this.autoStart = opts.autoStart || false;
 	this.parent = opts.parent;
 	this.parentStart = opts.parentStart;
@@ -31,13 +31,13 @@ const FakeProgress = function (opts) {
  */
 
 FakeProgress.prototype.start = function () {
-	this._time = 0;
-	this._intervalId = setInterval(this._onInterval.bind(this), this._intervalFrequency);
+	this.time = 0;
+	this.intervalId = setInterval(this.onInterval.bind(this), this.intervalFrequency);
 };
 
-FakeProgress.prototype._onInterval = function () {
-	this._time += this._intervalFrequency;
-	this.setProgress(1 - Math.exp(-1 * this._time / this.timeConstant));
+FakeProgress.prototype.onInterval = function () {
+	this.time += this.intervalFrequency;
+	this.setProgress(1 - Math.exp(-1 * this.time / this.timeConstant));
 };
 
 /**
@@ -56,8 +56,8 @@ FakeProgress.prototype.end = function () {
  */
 
 FakeProgress.prototype.stop = function () {
-	clearInterval(this._intervalId);
-	this._intervalId = null;
+	clearInterval(this.intervalId);
+	this.intervalId = null;
 };
 
 /**
