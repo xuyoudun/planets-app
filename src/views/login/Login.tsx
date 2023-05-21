@@ -3,20 +3,21 @@ import {Button, Checkbox, Divider, Form, Input} from 'antd';
 import {LockOutlined, UserOutlined} from '@ant-design/icons';
 import './Login.less';
 import {usePlanets} from 'planets';
+import {useNavigate} from 'react-router-dom';
 
 const Login = () => {
 
-  const {setAppOAuth} = usePlanets();
+  const {signIn} = usePlanets();
   const [form] = Form.useForm();
+  const navigate = useNavigate();
 
   useEffect(() => {
     //
-  });
+  }, []);
 
   const handleLogin = () => {
     form.validateFields().then((values) => {
-      values;
-      setAppOAuth?.({});
+      signIn(values, () => navigate('/dashboard'));
     }).finally(() => {
       //
     });

@@ -13,7 +13,7 @@ const NvaTab = () => {
 
   const getMenuItems = (contextKey: string): ItemType[] => {
     return [
-      {label: '刷新', key: 'refresh'},
+      contextKey == activeKey ? {label: '刷新', key: 'refresh'} : null,
       contextKey == NAV_TAB_DASHBOARD.url ? null : {label: '关闭', key: 'remove'},
       {label: '关闭其他', key: 'removeOthers'},
       {label: '全部关闭', key: 'removeAll'}
