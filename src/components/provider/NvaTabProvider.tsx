@@ -9,7 +9,7 @@ export interface NvaTab {
 
 export interface NvaTabProviderProps {
   autoOpen?: boolean;
-  children?: ReactNode | undefined;
+  children?: ReactNode;
 }
 
 export type NvaTabContextProps = {
@@ -106,9 +106,9 @@ const NvaTabProvider: React.FC<NvaTabProviderProps> = ({children, autoOpen = tru
 
   const refresh = () => {
     // eslint-disable-next-line no-alert
-    navigate(0);
+    //navigate(0);
     // TODO
-    //navigate(pathname + search, {replace: true});
+    navigate(pathname + search, {replace: true});
   };
 
   const openNewNvaTab = ({url, title, search = null}: NvaTab) => {

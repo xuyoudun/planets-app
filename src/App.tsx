@@ -6,20 +6,17 @@ import 'dayjs/locale/zh-cn';
 import zhCN from 'antd/locale/zh_CN';
 import 'antd/dist/reset.css';
 import './index.css';
-import {BrowserRouter} from 'react-router-dom';
 import {PlanetsProvider} from 'planets';
-import AppRoutes from './route/AppRoutes';
+import AppRoutes from './router';
 
 dayjs.locale('zh-cn');
 
 const App = () => {
   return (
     <ConfigProvider locale={zhCN} theme={{algorithm: [theme.defaultAlgorithm/*, theme.compactAlgorithm*/]}}>
-      <BrowserRouter>
-        <PlanetsProvider>
-          <AppRoutes/>
-        </PlanetsProvider>
-      </BrowserRouter>
+      <PlanetsProvider>
+        <AppRoutes/>
+      </PlanetsProvider>
     </ConfigProvider>
   );
 };

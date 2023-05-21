@@ -1,15 +1,12 @@
-import React, {Context, ReactNode, useEffect, useState} from 'react';
-import {ItemType} from 'antd/es/menu/hooks/useItems';
-import {Navigate, NavLink, useLocation} from 'react-router-dom';
-
-import {APIRequest, APIResponse} from '../../api/axios';
+import React, {ReactNode, useEffect, useState} from 'react';
+import {Navigate, useLocation} from 'react-router-dom';
 
 export interface AppOauth {
-  access_token?: string;
-  token_type?: string;
+  access_token: string;
+  token_type: string;
   refresh_token?: string;
-  expires_in?: number;
-  scope?: string;
+  expires_in: number;
+  scope: string;
 }
 
 export interface AppRole {
@@ -20,158 +17,149 @@ export interface AppRole {
 export interface AppMenu {
   menuCode: string;
   menuName: string;
-  urlPath: string;
+  urlPath?: string;
   children?: AppMenu[];
 }
 
-export interface AppAuthentication {
-  token?: string;
-  username?: string;
-  menus?: ItemType[];
-  roles?: AppRole[];
+export interface AppUser {
+  userCode: string;
+  userName: string;
+  menus: AppMenu[];
+  roles: AppRole[];
   position?: any[];
-  setAppOAuth?: (oauth: AppOauth) => void;
 }
 
-interface AuthenticationRequest<P, T> {
-  (requestData: P): Promise<T>;
-}
 
-export const authentication: AuthenticationRequest<unknown, AppOauth> = (data) => {
+export type AppAuthentication = {
+  oauth: AppOauth;
+  signIn: (data: any, callback: VoidFunction) => void;
+  signOut: (allback: VoidFunction) => void;
+} & AppUser
+
+export const authentication = (data: any): Promise<AppOauth> => {
   data;
-  // TODO
-  // 后续切换成请求认证API即可
-  const result: AppOauth = {
+  // fake token
+  const result = {
     'access_token': 'c830475f-4f6f-4587-810f-e480d9c749a8',
     'token_type': 'bearer',
     'refresh_token': '84e2e42f-19ac-408c-82b2-b6e48ca1ddae',
     'expires_in': 7200,
     'scope': 'read write trust'
   };
-  return new Promise((resolve) => {
+  return new Promise<AppOauth>((resolve) => {
     setTimeout(() => {
       resolve(result);
-    }, 300);
+    }, 200);
   });
 };
 
-export const getUser: APIRequest<any> = () => {
-  // TODO
-  // 后续切换成请求认证API即可
-  const username = '匿名用户';
-  const menuList: AppMenu[] = [
+export const getSessionUser = (): Promise<AppUser> => {
+  const menus: AppMenu[] = [
     {
-      menuCode: 'test-fight',
-      menuName: '测试页',
-      urlPath: '',
-      children: [
-        {
-          menuCode: 'test-fight6',
-          menuName: 'TestFight6',
-          urlPath: '/666'
-        },
-        {
-          menuCode: 'test-fight7',
-          menuName: 'TestFight7',
-          urlPath: '/777'
-        },
-        {
-          menuCode: 'test-fight8',
-          menuName: 'TestFight8',
-          urlPath: '/888'
-        }
-      ]
+      menuCode: 'dashboard',
+      menuName: '首页',
+      urlPath: '/dashboard'
     },
     {
-      menuCode: 'system',
-      menuName: '系统设置',
-      urlPath: '',
+      menuCode: 'test-fight',
+      menuName: 'TestFight',
       children: [
         {
-          menuCode: 'config-view',
-          menuName: '配置页',
-          urlPath: '/system/entity/config'
+          menuCode: 'test-fight-1',
+          menuName: 'TestFight1',
+          urlPath: '/1/test-fight'
         },
         {
-          menuCode: 'query-view',
-          menuName: '查询页',
-          urlPath: '/system/entity/sup_vendor/query'
+          menuCode: 'test-fight-2',
+          menuName: 'TestFight2',
+          urlPath: '/2/test-fight'
+        },
+        {
+          menuCode: 'test-fight-3',
+          menuName: 'TestFight3',
+          urlPath: '/3/test-fight'
         }
       ]
     }
   ];
+  const roles: AppRole[] = [
+    {
+      roleCode: 'Admin',
+      roleName: '管理员'
+    }
+  ];
+  const userCode = 'Admin';
+  const userName = 'Admin';
 
-  // API返回的菜单映射成前端菜单
-  const toMenu = (menuList: AppMenu[]): ItemType[] => {
-    return menuList.map((menu) => {
-      return {
-        label: <NavLink to={`${menu.urlPath}?tname=${menu.menuName}`}>{menu.menuName}</NavLink>,
-        key: menu.menuCode,
-        ...(menu.children ? {children: toMenu(menu.children)} : null)
-      };
-    });
-  };
-
-  const menus: ItemType[] = toMenu(menuList);
-  const roles: AppRole[] = [];
-
-  const res: APIResponse = {
-    status: 'SUCCESS',
-    code: '200',
-    message: '',
-    response: {roles, username, menus}
-  };
-  return new Promise((resolve) => {
+  return new Promise<AppUser>((resolve) => {
     setTimeout(() => {
-      resolve(res);
-    }, 300);
+      resolve({menus, roles, userCode, userName});
+    }, 200);
   });
 };
 
 
-export const PlanetsContext: Context<AppAuthentication> = React.createContext({});
+export const PlanetsContext = React.createContext<AppAuthentication>({
+  userCode: '', userName: '', menus: [], roles: [],
+  oauth: {
+    'access_token': '',
+    'token_type': '',
+    'expires_in': 3600,
+    'scope': 'default'
+  },
+  signIn: (data, callback) => callback,
+  signOut: (callback) => callback
+});
 
-export function usePlanets(): AppAuthentication {
+export function usePlanets() {
   return React.useContext(PlanetsContext);
 }
 
-interface AuthProviderProps {
-  children?: ReactNode | undefined;
-}
+const PlanetsProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
-const PlanetsProvider: React.FC<AuthProviderProps> = ({children}) => {
-
-  const [oauth, setOAuth] = useState<AppOauth>(() => {
+  const [oauth, setOauth] = useState<AppOauth>(() => {
     const accessToken = sessionStorage.getItem('ACCESS_TOKEN');
-    return accessToken ? JSON.parse(accessToken) : {};
+    return accessToken ? JSON.parse(accessToken) : undefined;
   });
 
-  const setAppOAuth = (oauth: AppOauth) => {
-    setOAuth(oauth);
-    sessionStorage.setItem('ACCESS_TOKEN', JSON.stringify(oauth));
+  const [appUser, setAppUser] = useState<AppUser>({userCode: '', userName: '', menus: [], roles: []});
+
+  const signOut = (callback: VoidFunction) => {
+    callback();
   };
 
-  const [authorization, setAuthorization] = useState<AppAuthentication>(() => ({username: '未登录'}));
+  const signIn = (data: any, callback: VoidFunction) => {
+    // 登录的过程通常分为认证和获取用户信息两个步骤
+    Promise.all([authentication(data), getSessionUser()])
+      .then(([oauth, appUser]) => {
+        setOauth(oauth);
+        sessionStorage.setItem('ACCESS_TOKEN', JSON.stringify(oauth));
+        setAppUser(appUser);
+        callback();
+      })
+      .catch((error) => {
+        error;
+      });
+  };
 
-  // token改变后加载用户信息
   useEffect(() => {
-    getUser().then((res: any) => {
-      setAuthorization(res.response);
-    });
-  }, [oauth.access_token]);
+    if (oauth.access_token && !appUser.userCode) {
+      getSessionUser().then((appUser) => setAppUser(appUser));
+    }
+  }, []);
 
   return (
-    <PlanetsContext.Provider value={{...authorization, setAppOAuth}}>
+    <PlanetsContext.Provider value={{oauth, signIn, signOut, ...appUser}}>
       {children}
     </PlanetsContext.Provider>
   );
 };
 
-export function Authorization({children}: { children: ReactNode }) {
+export const Authorization: React.FC<{ children: ReactNode }> = ({children}) => {
   const auth = usePlanets();
   const location = useLocation();
 
-  if (!auth.token) {
+  if (!auth.oauth?.access_token) {
     // Redirect them to the /login page, but save the current location they were
     // trying to go to when they were redirected. This allows us to send them
     // along to that page after they login, which is a nicer user experience
@@ -179,7 +167,7 @@ export function Authorization({children}: { children: ReactNode }) {
     return <Navigate to="/login" state={{from: location}} replace/>;
   }
 
-  return children;
-}
+  return <>{children}</>;
+};
 
 export default PlanetsProvider;
