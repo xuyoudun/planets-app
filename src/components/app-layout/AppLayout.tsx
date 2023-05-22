@@ -1,7 +1,7 @@
 import React, {Suspense, useState} from 'react';
-import {UserOutlined} from '@ant-design/icons';
+import {LogoutOutlined, UserOutlined} from '@ant-design/icons';
 import type {MenuProps} from 'antd';
-import {Layout, Menu, Spin, theme} from 'antd';
+import {Dropdown, Layout, Menu, Spin, theme} from 'antd';
 import {NavLink, Outlet, useNavigate} from 'react-router-dom';
 import NvaTab from '../nva-tab/NvaTab';
 import NvaTabProvider from '../provider/NvaTabProvider';
@@ -31,6 +31,19 @@ const AppLayout: React.FC = () => {
     token: {colorBgContainer}
   } = theme.useToken();
 
+  const items: MenuProps['items'] = [
+    {
+      key: '1',
+      icon: <LogoutOutlined/>,
+      label: (
+        <a target="_blank" onClick={() => signOut(() => navigate('/login'))}>
+          注销
+        </a>
+      )
+    }
+  ];
+
+
   return (
     <Layout style={{minHeight: '100vh'}}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
@@ -40,8 +53,10 @@ const AppLayout: React.FC = () => {
       <Layout>
         <Header style={{padding: 0, background: '#001529'}}>
           <div style={{float: 'right', paddingRight: '48px'}}>
-            <UserOutlined style={{fontSize: '24px', color: colorBgContainer}}
-              onClick={() => signOut(() => navigate('/login'))}/>
+            <Dropdown menu={{items}} placement="bottomRight">
+              <UserOutlined style={{fontSize: '24px', color: colorBgContainer}}
+                onClick={() => null}/>
+            </Dropdown>
           </div>
         </Header>
         <Content>
