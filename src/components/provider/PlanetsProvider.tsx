@@ -144,6 +144,9 @@ const PlanetsProvider: React.FC<{ children: ReactNode }> = ({children}) => {
   };
 
   useEffect(() => {
+    // react18的bug， 严格模式下，会触发两次组件加载，这里会执行两次
+    // 解决方式：<React.StrictMode> 标记并将其删除，不推荐
+    // 或者构建用于生产。双重渲染问题应该消失了 -- 来自 React 官方文档
     if (oauth.access_token && !appUser.userCode) {
       getSessionUser().then((appUser) => setAppUser(appUser));
     }

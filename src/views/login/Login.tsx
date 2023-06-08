@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Checkbox, Divider, Form, Input} from 'antd';
+import {Button, Checkbox, Divider, Form, Input,message} from 'antd';
 import {LockOutlined, UserOutlined} from '@ant-design/icons';
 import './Login.less';
 import {usePlanets} from 'planets';
@@ -24,6 +24,7 @@ const Login = () => {
         signIn(values, () => {
           setVerifying(false);
           navigate('/dashboard');
+          message.success('Welcome Back');
         });
       })
       .catch((/*error*/) => {
